@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Image with Webcam</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #full-page-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw; /* viewport width */
+            height: 100vh; /* viewport height */
+            object-fit: cover; /* Cover the viewport while maintaining aspect ratio */
+            z-index: -1;
+        }
+
+        /*#mx-auto {*/
+        /*    position: fixed;*/
+        /*    right: 0; !* Align to the right edge of the page *!*/
+        /*    top: 0; !* Align to the top edge of the page *!*/
+        /*    width: 50vw; !* 25% of the viewport width *!*/
+        /*    height: 50vh; !* 25% of the viewport height *!*/
+        /*    z-index: 1; !* Make sure the webcam feed is above other content *!*/
+        /*}*/
+
+        /*#mx-auto img {*/
+        /*    width: 100%;*/
+        /*    height: 100%;*/
+        /*    object-fit: cover; !* This will cover the div with the video feed without stretching *!*/
+        /*}*/
+
+    </style>
+</head>
+<body>
+
+<img id="full-page-image" src="{{ url_for('static', filename='images/d2.jpg') }}" alt="Full Page Background">
+<!--<video id="webcam" autoplay></video>-->
+<div id="mx-auto">
+    <img src="{{ url_for('video_feed') }}">
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+<script type="text/javascript">
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('refresh_image', function () {
+        // Refresh the image by changing its source with a cache-busting query parameter
+        var imageElement = document.getElementById('full-page-image');
+        imageElement.src = "{{ url_for('static', filename='images/d2.jpg') }}?" + new Date().getTime();
+
+    });
+
+    socket.on('select_image', function () {
+        // Trigger a click on the image or perform any other action
+        var imageElement = document.getElementById('full-page-image');
+        imageElement.click(); // This assumes you have an event listener on the image for the click event
+    });
+
+    // Webcam setup:
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({video: true})
+            .then(function (stream) {
+                var video = document.getElementById('webcam');
+                video.srcObject = stream;
+            })
+            .catch(function (error) {
+                console.log("Something went wrong initializing the webcam stream: ", error);
+            });
+    }
+
+    // Optional: If you have a click event on the image
+    document.getElementById('full-page-image').addEventListener('click', function () {
+        // Perform an action when the image is clicked
+        console.log('Image clicked!');
+        // You can emit a socket event back to server if needed
+        // socket.emit('image_clicked');
+    });
+</script>
+
+
+</body>
+</html>

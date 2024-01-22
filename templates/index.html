@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pose Estimation</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        #movable-box {
+            width: 100px;
+            height: 100px;
+            background-color: blue;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+<!-- As a link -->
+<div class="mx-auto" style="width: 700px;">
+    <img src="{{ url_for('video_feed') }}">
+</div>
+<img id="interactive-image" src="d2.jpg" onclick="onImageClick()">
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+<script type="text/javascript">
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function () {
+        console.log('Websocket connected!');
+    });
+
+    socket.on('move_box', function (data) {
+        const box = document.getElementById('movable-box');
+        // You would add more complex logic here based on the data received
+        if (data.direction === 'left') {
+            let currentLeft = parseInt(box.style.left, 10) || 0;
+            box.style.left = (currentLeft - 10) + 'px';
+        }
+        // Add other directions and checks as needed
+        if (data.direction === 'right') {
+            let currentLeft = parseInt(box.style.left, 10) || 0;
+            box.style.left = (currentLeft + 10) + 'px';
+        }
+        if (data.direction === 'up') {
+            let currentTop = parseInt(box.style.top, 10) || 0;
+            box.style.top = (currentTop - 10) + 'px';
+        }
+        if (data.direction === 'down') {
+            let currentTop = parseInt(box.style.top, 10) || 0;
+            box.style.top = (currentTop + 10) + 'px';
+        }
+    });
+</script>
+</body>
+</html>
